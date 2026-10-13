@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mazda Miata Year-by-Year</title>
+<style>
+  :root {
+    --bg: #f5f3ee;
+    --card: #ffffff;
+    --ink: #1d1f23;
+    --muted: #6b6f78;
+    --accent: #c8102e;
+    --line: #e2dfd7;
+    --chip: #efece5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15171a;
+      --card: #1f2227;
+      --ink: #eceef2;
+      --muted: #9aa0ab;
+      --accent: #ff4d63;
+      --line: #2e323a;
+      --chip: #2a2e35;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15171a;
+    --card: #1f2227;
+    --ink: #eceef2;
+    --muted: #9aa0ab;
+    --accent: #ff4d63;
+    --line: #2e323a;
+    --chip: #2a2e35;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  header {
+    padding: 20px 16px 8px;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0; font-size: 0.95rem; }
+  .controls {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    max-width: 880px; margin: 12px auto 0; padding: 0 16px;
+  }
+  select, button {
+    font: inherit; color: var(--ink); background: var(--card);
+    border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px;
+    cursor: pointer;
+  }
+  button:disabled { opacity: 0.4; cursor: default; }
+  .counter { color: var(--muted); font-size: 0.9rem; margin-left: auto; }
+  main {
+    max-width: 880px; margin: 16px auto; padding: 0 16px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .photo {
+    background: var(--chip);
+    aspect-ratio: 16 / 10;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-note {
+    font-size: 0.8rem; color: var(--muted);
+    padding: 6px 16px 0;
+  }
+  .body { padding: 16px 20px 20px; }
+  .gen-tag {
+    display: inline-block; font-size: 0.75rem; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--accent); font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .year { font-size: 2.2rem; font-weight: 800; line-height: 1.1; margin: 0; }
+  .headline { font-size: 1.05rem; font-weight: 600; margin: 4px 0 12px; }
+  .grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0;
+  }
+  .stat {
+    background: var(--chip); border-radius: 10px; padding: 10px 12px;
+  }
+  .stat .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .stat .value { font-weight: 600; margin-top: 2px; }
+  ul.notes { padding-left: 20px; margin: 8px 0 0; }
+  ul.notes li { margin: 4px 0; }
+  .price {
+    border-top: 1px solid var(--line); margin-top: 14px; padding-top: 12px;
+    font-size: 0.95rem;
+  }
+  .price strong { display: block; margin-bottom: 4px; }
+  .price .muted { color: var(--muted); font-size: 0.85rem; }
+  .nav {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px; margin-top: 14px;
+  }
+  .nav button { min-width: 110px; padding: 12px 14px; }
+  .dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 520px; }
+  .dot {
+    width: 9px; height: 9px; border-radius: 50%; border: none; padding: 0;
+    background: var(--line); cursor: pointer;
+  }
+  .dot.on { background: var(--accent); }
+  .dot.gen-start { box-shadow: 0 0 0 2px var(--bg), 0 0 0 3px var(--muted); }
+  footer {
+    max-width: 880px; margin: 24px auto 40px; padding: 0 16px;
+    color: var(--muted); font-size: 0.85rem;
+  }
+  footer a { color: var(--accent); }
+  footer h2 { font-size: 1rem; color: var(--ink); margin-bottom: 4px; }
+  footer ul { padding-left: 18px; margin: 4px 0 12px; }
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr; }
+    .year { font-size: 1.8rem; }
+    .nav button { min-width: 0; flex: 1; }
+    .counter { width: 100%; margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mazda Miata, Year by Year</h1>
+  <p class="sub">Four generations, 1990 to 2026. Use the arrow keys, the buttons, or swipe to flip through.</p>
+</header>
+
+<div class="controls">
+  <select id="jump" aria-label="Jump to year"></select>
+  <button id="theme" type="button" aria-label="Toggle dark mode">Theme</button>
+  <span class="counter" id="counter"></span>
+</div>
+
+<main>
+  <article class="card" id="card" aria-live="polite"></article>
+  <div class="nav">
+    <button id="prev" type="button">&larr; Prev</button>
+    <div class="dots" id="dots"></div>
+    <button id="next" type="button">Next &rarr;</button>
+  </div>
+</main>
+
+<footer>
+  <h2>Sources</h2>
+  <ul>
+    <li>Generation dates, engines, and special editions: Wikipedia articles <a href="https://en.wikipedia.org/wiki/Mazda_MX-5_(NA)">NA</a>, <a href="https://en.wikipedia.org/wiki/Mazda_MX-5_(NB)">NB</a>, <a href="https://en.wikipedia.org/wiki/Mazda_MX-5_(NC)">NC</a>, <a href="https://en.wikipedia.org/wiki/Mazda_MX-5_(ND)">ND</a>.</li>
+    <li>Generation history and model-year notes: <a href="https://www.mazdausa.com/discover/mazda-mx-5-miata-fans">Mazda USA</a>, <a href="https://carbuzz.com/cars/mazda/mx-5-miata/generations/">CarBuzz</a>.</li>
+    <li>2026 pricing: <a href="https://news.mazdausa.com/2026-01-27-2026-Mazda-MX-5-Miata-Pricing-and-Packaging?asPDF=1">Mazda USA 2026 pricing</a>, <a href="https://www.kbb.com/car-news/2026-mazda-mx-5-miata-starts-at-31665">KBB</a>, <a href="https://www.thedrive.com/news/the-mazda-miata-now-officially-costs-more-than-30000">The Drive</a>.</li>
+    <li>Used-market averages (June 2026 snapshot): <a href="https://visor.vin/overview/mazda/mx-5-miata">Visor</a>. Recent NA and NB sales: <a href="https://www.classic.com/m/mazda/mx-5-miata/">Classic.com</a>. NC price note: <a href="https://jalopnik.com/you-can-get-an-nc-mazda-miata-for-surprisingly-little-m-1798523687">Jalopnik</a>.</li>
+  </ul>
+  <p>Photos are hotlinked from Wikimedia Commons through the Wikipedia articles above. Check each image's license before reusing it. Used prices are generation-wide snapshots, not per-year valuations. Check Hagerty or KBB for a specific car's trim, mileage, and condition.</p>
+</footer>
+
+<script>
+const GEN_PHOTO = {
+  NA: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cd/Red-na-nb.JPG/400px-Red-na-nb.JPG",
+  NB: "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/1999_Mazda_MX-5_Miata_Base_in_Highlight_Silver_Metallic%2C_Rear_Left%2C_08-06-2022.jpg/400px-1999_Mazda_MX-5_Miata_Base_in_Highlight_Silver_Metallic%2C_Rear_Left%2C_08-06-2022.jpg",
+  NC: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/3rd_Mazda_MX-5_--_06-14-2010.jpg/400px-3rd_Mazda_MX-5_--_06-14-2010.jpg",
+  ND: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/Mazda_MX-5_%28ND%29_1X7A7471.jpg/400px-Mazda_MX-5_%28ND%29_1X7A7471.jpg"
+};
+
+const GEN_INFO = {
+  NA: {
+    name: "NA (1st generation)",
+    years: "1990 to 1997 (US model years); launched in Japan as the Eunos Roadster in 1989",
+    price: {
+      label: "Used market (NA, 1996 to 1997 only)",
+      value: "Visor average asking about $12,093 (10 listings, too few to be reliable). Recent 1996 base-model sales ranged roughly $7,000 to $20,000, depending on condition and modifications (Classic.com).",
+      note: "Prices are rising as these become collectible (Jalopnik)."
+    },
+    blurb: "Front-engine, rear-wheel drive, with pop-up headlights. The original car that started the lightweight roadster revival."
+  },
+  NB: {
+    name: "NB (2nd generation)",
+    years: "1999 to 2005 (US model years); NB1 is 1999 to 2000, NB2 is 2001 to 2005",
+    price: {
+      label: "Used market (NB, all years)",
+      value: "Visor average asking about $11,245 (about 144 listings). Mazdaspeed turbo sales ran roughly $8,700 to $26,500 (Classic.com), with low-mileage original cars at the top.",
+      note: "Classic.com data is auction and dealer listings, not a standard valuation."
+    },
+    blurb: "A bigger, stiffer car with a 1.6 or 1.8 engine. The 2001 facelift brought the 1.8 up to 152 hp outside the US, and the 2004 to 2005 Mazdaspeed was the only turbocharged factory Miata."
+  },
+  NC: {
+    name: "NC (3rd generation)",
+    years: "2006 to 2015 (North American model years); NC1 is 2006 to 2008, NC2 is 2009 to 2015",
+    price: {
+      label: "Used market (NC, all years)",
+      value: "Visor average asking about $12,945 (about 298 listings), the largest sample in this guide.",
+      note: "Jalopnik says clean NC cars with under 100,000 miles can often be found for under $10,000. The article's date is not shown."
+    },
+    blurb: "The first Miata with a retractable hardtop (PRHT) option and a 2.0 L engine. The engine moved to a front mid-position, so the car is less of a pure front-engine roadster than the NA and NB."
+  },
+  ND: {
+    name: "ND (4th generation)",
+    years: "2016 to present (production started March 2015 in Hiroshima)",
+    price: {
+      label: "Used market (ND) and new 2026 MSRP",
+      value: "Visor average asking about $35,684 for used ND cars (June 2026). 2026 new MSRP, excluding destination: Sport $30,430 (manual). Club $33,930 (soft top) or $41,900 (RF), manual. Grand Touring manual $35,730 (soft top) or $38,450 (RF). Grand Touring automatic $36,650 (soft top) or $39,420 (RF). Destination is $1,235.",
+      note: "The Brembo, BBS, and Recaro package ($5,050) is included on the RF."
+    },
+    blurb: "Skyactiv-G engines and a lighter, more focused car. Added the RF retractable hardtop in 2017. Engines went from 2.0 L around 155 to 158 hp to 181 hp in 2019."
+  }
+};
+
+// One entry per model year. img is optional; if missing or it fails to load, the generation photo is used.
+const YEARS = [
+  // NA
+  { year: 1990, gen: "NA", headline: "US launch year",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/1990_Mazda_MX-5_%28NA%29_hardtop_%282015-07-24%29.jpg/400px-1990_Mazda_MX-5_%28NA%29_hardtop_%282015-07-24%29.jpg",
+    imgNote: "1990 car with the hardtop (Australia)",
+    engine: "1.6 L DOHC I4", power: "115 hp (manual)",
+    notes: [
+      "Miata name in North America, Eunos Roadster in Japan.",
+      "Pop-up headlights.",
+      "Automatic was offered with less power (about 105 hp)."
+    ]
+  },
+  { year: 1991, gen: "NA", headline: "Special Edition models appear",
+    engine: "1.6 L DOHC I4", power: "115 hp",
+    notes: [
+      "US Special Edition package.",
+      "Japan J Limited (sunburst yellow) is also from this era.",
+      "Base engine unchanged from 1990."
+    ]
+  },
+  { year: 1992, gen: "NA", headline: "Sunburst and facelift era",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3b/Mazda_MX-5_%28NA%29_Sunburst_%28cropped%29.jpg/400px-Mazda_MX-5_%28NA%29_Sunburst_%28cropped%29.jpg",
+    imgNote: "Sunburst special edition",
+    engine: "1.6 L DOHC I4", power: "115 hp",
+    notes: [
+      "US Sunburst special edition and a Black Miata edition.",
+      "Facelift period runs through 1993 (Wikipedia).",
+      "M2 1001 Cafe Roadster is a Japanese tuner build from this period."
+    ]
+  },
+  { year: 1993, gen: "NA", headline: "Limited Edition and facelift",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a6/1993_Mazda_MX-5_Miata_Limited_Edition%2C_Front_Left%2C_08-16-2017.jpg/400px-1993_Mazda_MX-5_Miata_Limited_Edition%2C_Front_Left%2C_08-16-2017.jpg",
+    imgNote: "1993 Limited Edition",
+    engine: "1.6 L DOHC I4", power: "115 hp",
+    notes: [
+      "US Limited Edition.",
+      "Japan J Limited II (1993).",
+      "Energia electric concept shown in 1993 (not production)."
+    ]
+  },
+  { year: 1994, gen: "NA", headline: "1.8 L engine arrives",
+    engine: "1.8 L BP I4", power: "129 hp",
+    notes: [
+      "Engine grew to 1.8 L, which was the big change of this generation.",
+      "R Package offered from 1994 to 1997.",
+      "Europe got a detuned 1.6 with 89 bhp."
+    ]
+  },
+  { year: 1995, gen: "NA", headline: "M Edition",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/1995_Mazda_MX-5_Miata_M_Edition%2C_front_left%2C_09-30-2023.jpg/400px-1995_Mazda_MX-5_Miata_M_Edition%2C_front_left%2C_09-30-2023.jpg",
+    imgNote: "1995 M Edition",
+    engine: "1.8 L BP I4", power: "129 hp",
+    notes: [
+      "Annual M Editions were offered in the NA years.",
+      "M Speedster concept shown in 1995 (not production).",
+      "Same 1.8 L engine as 1994."
+    ]
+  },
+  { year: 1996, gen: "NA", headline: "Revised 1.8 L",
+    engine: "1.8 L BP I4", power: "133 hp",
+    notes: [
+      "Power rose to 133 hp.",
+      "The M Coupe concept was shown in 1996 (not production).",
+      "Recent base-model sales are the best NA price reference (see generation panel)."
+    ]
+  },
+  { year: 1997, gen: "NA", headline: "Final NA year",
+    engine: "1.8 L BP I4", power: "133 hp",
+    notes: [
+      "Last year of the first generation in North America.",
+      "Special Touring Option (STO) and a Speedster Edition in Canada.",
+      "NA production ended in 1997 (Wikipedia)."
+    ]
+  },
+
+  // NB
+  { year: 1999, gen: "NB", headline: "NB debut and 10th Anniversary",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/1999_Mazda_MX-5_Miata_Base_in_Highlight_Silver_Metallic%2C_Front_Left%2C_08-06-2022.jpg/400px-1999_Mazda_MX-5_Miata_Base_in_Highlight_Silver_Metallic%2C_Front_Left%2C_08-06-2022.jpg",
+    imgNote: "1999 base model, Highlight Silver",
+    engine: "1.8 L BP-4W I4 (1.6 L also offered)", power: "140 hp (1.8), 108 hp (1.6)",
+    notes: [
+      "The 10th Anniversary model had a run of 7,500 units with a six-speed, Bilstein shocks, and a Torsen LSD.",
+      "Mazda USA dates this as the first NB model year; the 1998 model year was skipped in the US.",
+      "NB is a bigger, stiffer car than the NA."
+    ]
+  },
+  { year: 2000, gen: "NB", headline: "NB1 continues",
+    engine: "1.8 L BP-4W I4", power: "140 hp",
+    notes: [
+      "Last year of NB1 before the 2001 facelift.",
+      "Mono-Posto single-seat concept shown at SEMA (not produced).",
+      "NB production began in January 1998 (Wikipedia); US sales began with the 1999 model year."
+    ]
+  },
+  { year: 2001, gen: "NB", headline: "Facelift, 1.8 L up to 152 hp outside the US",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/2001_Mazda_MX-5_Miata%2C_rear_left%2C_07-09-2023.jpg/400px-2001_Mazda_MX-5_Miata%2C_rear_left%2C_07-09-2023.jpg",
+    imgNote: "2001 facelift, rear three-quarter",
+    engine: "1.8 L BP6D I4", power: "152 hp (JP/UK/AU), 143 hp (US)",
+    notes: [
+      "Facelift started the NB2 years.",
+      "1.6 L version: 123 hp.",
+      "Top trims added 16-inch wheels, an LSD, and Bilstein suspension."
+    ]
+  },
+  { year: 2002, gen: "NB", headline: "SP special edition",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/MX-5_SP_Engine_Bay.jpg/400px-MX-5_SP_Engine_Bay.jpg",
+    imgNote: "2002 SP engine bay",
+    engine: "1.8 L (SP tuned)", power: "200 hp (SP, per Wikipedia)",
+    notes: [
+      "SP: 100 units, Australia-focused, with a carbon-Kevlar intake.",
+      "The rear SP decal is the only outside identifier on SP models.",
+      "The SP logo is also embroidered into the carpets and headrests."
+    ]
+  },
+  { year: 2003, gen: "NB", headline: "Club Sport and Roadster Coupé",
+    engine: "1.8 L BP-Z3 I4", power: "146 hp (base 1.8)",
+    notes: [
+      "Miata Club Sport: 50 units built for SCCA competition.",
+      "Roadster Coupé: fixed-roof model, 179 units, Japan only.",
+      "Shinsen Version (SV) trim sat between base and LS."
+    ]
+  },
+  { year: 2004, gen: "NB", headline: "Mazdaspeed MX-5 turbo",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/05_and_04_Mazdaspeed_Miata.jpg/400px-05_and_04_Mazdaspeed_Miata.jpg",
+    imgNote: "2004 Velocity Red (right) with a 2005 Lava Orange Mazdaspeed",
+    engine: "1.8 L BPT turbo I4", power: "178 hp (JP/US)",
+    notes: [
+      "The only turbocharged factory Miata.",
+      "Sold as Roadster Turbo in Japan and SE in Australia.",
+      "Classic.com recent sales for Mazdaspeed models ran about $8,700 to $26,500."
+    ]
+  },
+  { year: 2005, gen: "NB", headline: "Last NB year; NC arrives",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7f/05_and_04_Mazdaspeed_Miata.jpg/400px-05_and_04_Mazdaspeed_Miata.jpg",
+    imgNote: "2005 Lava Orange Mazdaspeed (left)",
+    engine: "1.8 L BPT turbo I4 (Mazdaspeed)", power: "178 hp",
+    notes: [
+      "Last year of NB production (Wikipedia gives 1998 to 2005 as the production span).",
+      "NC is the next generation and arrives as the 2006 US model.",
+      "Troy Lee Designs MX-5 was a 2005 SEMA one-off."
+    ]
+  },
+
+  // NC
+  { year: 2006, gen: "NC", headline: "NC debut and 3rd Generation Limited",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/2006_Mazda_MX-5.jpg/400px-2006_Mazda_MX-5.jpg",
+    imgNote: "2006 3rd Generation Limited",
+    engine: "2.0 L MZR LF-VE I4", power: "166 hp manual, 158 hp automatic",
+    notes: [
+      "3rd Generation Limited: 3,500 built.",
+      "Power Retractable Hard Top (PRHT) option begins.",
+      "First Miata with a 2.0 L engine in North America."
+    ]
+  },
+  { year: 2007, gen: "NC", headline: "MS-R racing package",
+    engine: "2.0 L MZR LF-VE I4", power: "166 hp manual",
+    notes: [
+      "MS-R package for SCCA racing.",
+      "Roadster Kurenai concept shown.",
+      "Engine and chassis carried over from 2006."
+    ]
+  },
+  { year: 2008, gen: "NC", headline: "Niseko and Icy Blue",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fe/Mazda_MX-5_III_Niseko_front_20100501.jpg/400px-Mazda_MX-5_III_Niseko_front_20100501.jpg",
+    imgNote: "2008 Niseko (Europe)",
+    engine: "2.0 L MZR LF-VE I4", power: "166 hp manual",
+    notes: [
+      "Niseko special edition in Europe: 800 units.",
+      "Icy Blue special edition (per Wikipedia's 2008 listing).",
+      "NC1 ends with the 2009 facelift."
+    ]
+  },
+  { year: 2009, gen: "NC", headline: "NC2 facelift",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/2009_Mazda_MX-5_Miata_--_08-28-2009.jpg/400px-2009_Mazda_MX-5_Miata_--_08-28-2009.jpg",
+    imgNote: "2009 facelift front fascia",
+    engine: "2.0 L MZR LF-VE I4", power: "167 hp manual, 158 hp automatic",
+    notes: [
+      "New front fascia starts the NC2 years.",
+      "Superlight concept shown at IAA 2009 (not production).",
+      "Roadster 20th Anniversary in Japan."
+    ]
+  },
+  { year: 2010, gen: "NC", headline: "20th Anniversary in Europe",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/3rd_Mazda_MX-5_--_06-14-2010.jpg/400px-3rd_Mazda_MX-5_--_06-14-2010.jpg",
+    imgNote: "Third-generation MX-5 (2010)",
+    engine: "2.0 L LF-VE I4", power: "167 hp",
+    notes: [
+      "20th Anniversary in Europe: 2,000 units.",
+      "Miyako (UK) and Matte and Black (France) special editions.",
+      "Super20 SEMA concept shown."
+    ]
+  },
+  { year: 2011, gen: "NC", headline: "Special Edition and Sport Black",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/2011_Mazda_MX-5_PRHT_--_04-28-2011_rear.jpg/400px-2011_Mazda_MX-5_PRHT_--_04-28-2011_rear.jpg",
+    imgNote: "2011 MX-5 with the 2009 facelifted rear fascia",
+    engine: "2.0 L LF-VE I4", power: "160 PS (Sport Black, UK)",
+    notes: [
+      "US Special Edition: 750 units.",
+      "UK Sport Black: 500 units.",
+      "Canada SV: 180 units."
+    ]
+  },
+  { year: 2012, gen: "NC", headline: "Kuro Edition and interior update",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/2012_Mazda_MX-5_I_Roadster_Kuro_Edition_2.0_Front.jpg/400px-2012_Mazda_MX-5_I_Roadster_Kuro_Edition_2.0_Front.jpg",
+    imgNote: "2012 Kuro Edition",
+    engine: "2.0 L LF-VE I4", power: "167 hp",
+    notes: [
+      "US Special Edition: 450 units.",
+      "UK Kuro Edition and Venture Edition.",
+      "Interior updated with the facelifted design."
+    ]
+  },
+  { year: 2013, gen: "NC", headline: "Club trim replaces Touring (US)",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/Mazda_Miata_%288228749589%29_%28cropped%29.jpg/400px-Mazda_Miata_%288228749589%29_%28cropped%29.jpg",
+    imgNote: "2013 Miata Club",
+    engine: "2.0 L LF-VE I4", power: "167 hp",
+    notes: [
+      "Club trim is new for the US, replacing Touring.",
+      "BBR GT270 turbo tuner car (2.0 L, 268 hp, 100 units).",
+      "Jota MX-5 GT race car (four built)."
+    ]
+  },
+  { year: 2014, gen: "NC", headline: "25th Anniversary (UK)",
+    engine: "2.0 L LF-VE I4", power: "167 hp",
+    notes: [
+      "25th Anniversary in the UK: 1,099 units.",
+      "Part of the NC's late run, after the 2009 facelift.",
+      "Used NC prices are in the generation panel."
+    ]
+  },
+  { year: 2015, gen: "NC", headline: "Last NC year",
+    engine: "2.0 L LF-VE I4", power: "167 hp",
+    notes: [
+      "Final model year of the third generation.",
+      "ND production started March 2015 in Hiroshima.",
+      "NC cars with under 100,000 miles often sell under $10,000 (Jalopnik)."
+    ]
+  },
+
+  // ND
+  { year: 2016, gen: "ND", headline: "ND debut",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b7/Mazda_MX-5_%28ND%29_1X7A7471.jpg/400px-Mazda_MX-5_%28ND%29_1X7A7471.jpg",
+    imgNote: "ND generation photo",
+    engine: "2.0 L Skyactiv-G", power: "about 155 to 158 hp (US)",
+    notes: [
+      "Skyactiv-G engines; 1.5 L is offered outside the US (129 hp).",
+      "Icon edition in the UK: 600 units.",
+      "Levanto one-off with Garage Italia Customs."
+    ]
+  },
+  { year: 2017, gen: "ND", headline: "RF retractable hardtop arrives",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/2017_Mazda_MX-5_RF_Sport_NAV_2.0_Rear.jpg/400px-2017_Mazda_MX-5_RF_Sport_NAV_2.0_Rear.jpg",
+    imgNote: "2017 RF Sport (rear)",
+    engine: "2.0 L Skyactiv-G", power: "about 155 to 158 hp",
+    notes: [
+      "RF uses a targa-style roof with a retractable panel over the cockpit.",
+      "RF Launch Edition in the UK: 500 units.",
+      "RF is priced above the soft top at the same trim."
+    ]
+  },
+  { year: 2018, gen: "ND", headline: "Z-Sport and Yamamoto",
+    engine: "2.0 L Skyactiv-G", power: "about 155 to 158 hp",
+    notes: [
+      "Z-Sport special edition.",
+      "Yamamoto Signature: Italy, 4 units.",
+      "Still the pre-2019 engine tune."
+    ]
+  },
+  { year: 2019, gen: "ND", headline: "30th Anniversary and 181 hp",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dd/Mazda_MX-5_30th_Anniversary_Genf_2019_1Y7A5092.jpg/400px-Mazda_MX-5_30th_Anniversary_Genf_2019_1Y7A5092.jpg",
+    imgNote: "30th Anniversary Edition (Geneva 2019)",
+    engine: "2.0 L Skyactiv-G (revised)", power: "181 hp",
+    notes: [
+      "30th Anniversary: 3,000 units worldwide.",
+      "Engine revised to 181 hp.",
+      "GT-S trim added (2019 to 2020)."
+    ]
+  },
+  { year: 2020, gen: "ND", headline: "100th Anniversary (Japan)",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Mazda_MX-5_100th_Anniversary_Special_Edition_%285BA-ND5RC%29_%283%29.jpg/400px-Mazda_MX-5_100th_Anniversary_Special_Edition_%285BA-ND5RC%29_%283%29.jpg",
+    imgNote: "100th Anniversary Special Edition (Japan)",
+    engine: "2.0 L Skyactiv-G", power: "181 hp",
+    notes: [
+      "100th Anniversary special edition, Japan and other markets.",
+      "Eunos Edition in France: 110 units.",
+      "Marks Mazda's 100th anniversary as a company (founded 1920)."
+    ]
+  },
+  { year: 2021, gen: "ND", headline: "Quiet year",
+    engine: "2.0 L Skyactiv-G", power: "181 hp",
+    notes: [
+      "My sources don't list a special edition for 2021.",
+      "Same 2.0 L, 181 hp engine as 2019 to 2020.",
+      "Check Mazda's model year notes for trim changes."
+    ]
+  },
+  { year: 2022, gen: "ND", headline: "MCP 25th Anniversary",
+    engine: "2.0 L Skyactiv-G", power: "181 hp",
+    notes: [
+      "MCP 25th Anniversary in the Philippines.",
+      "Same 2.0 L engine.",
+      "Used ND prices are the best reference here (see generation panel)."
+    ]
+  },
+  { year: 2023, gen: "ND", headline: "Exclusive Line",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/89/2023_Mazda_MX-5_2.0_Skyactiv-G_Exclusive_Line_at_Green4Motor_Coventry_02.jpg/400px-2023_Mazda_MX-5_2.0_Skyactiv-G_Exclusive_Line_at_Green4Motor_Coventry_02.jpg",
+    imgNote: "2023 Exclusive Line (UK)",
+    engine: "2.0 L Skyactiv-G", power: "181 hp",
+    notes: [
+      "Exclusive Line trim shown in the UK.",
+      "Same engine as 2019 onward.",
+      "Check Mazda's trim sheets for exact equipment."
+    ]
+  },
+  { year: 2024, gen: "ND", headline: "Flat Out (Poland)",
+    engine: "2.0 L Skyactiv-G", power: "181 hp",
+    notes: [
+      "Flat Out edition in Poland: 2.0 L only.",
+      "Spirit Racing Roadster 12R is a Japan limited edition of 200 units (year not verified here).",
+      "Same 2.0 L engine."
+    ]
+  },
+  { year: 2025, gen: "ND", headline: "Facelift RF",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d5/Mazda_MX-5_RF_Skyactiv-G_184_Homura_%28IV%2C_Facelift%29_%E2%80%93_f_04042026.jpg/400px-Mazda_MX-5_RF_Skyactiv-G_184_Homura_%28IV%2C_Facelift%29_%E2%80%93_f_04042026.jpg",
+    imgNote: "Facelifted RF, Homura trim (front)",
+    engine: "2.0 L Skyactiv-G", power: "181 hp",
+    notes: [
+      "Facelifted RF in the current photos.",
+      "Same 2.0 L engine.",
+      "Check Mazda's 2025 specs for exact changes."
+    ]
+  },
+  { year: 2026, gen: "ND", headline: "Current model: Sport, Club, Grand Touring, RF",
+    img: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/43/Mazda_MX-5_RF_Skyactiv-G_184_Homura_%28IV%2C_Facelift%29_%E2%80%93_h_04042026.jpg/400px-Mazda_MX-5_RF_Skyactiv-G_184_Homura_%28IV%2C_Facelift%29_%E2%80%93_h_04042026.jpg",
+    imgNote: "Facelifted RF, Homura trim (rear)",
+    engine: "2.0 L Skyactiv-G", power: "181 hp",
+    notes: [
+      "Sport (manual only): $30,430 MSRP, excluding destination.",
+      "Club: $33,930 soft top, $41,900 RF (manual only).",
+      "Grand Touring: manual $35,730 soft top, $38,450 RF; automatic $36,650 soft top, $39,420 RF."
+    ],
+    price2026: true
+  }
+];
+
+const card = document.getElementById("card");
+const jump = document.getElementById("jump");
+const dotsEl = document.getElementById("dots");
+const counter = document.getElementById("counter");
+const prevBtn = document.getElementById("prev");
+const nextBtn = document.getElementById("next");
+let idx = 0;
+
+YEARS.forEach((y, i) => {
+  const opt = document.createElement("option");
+  opt.value = i;
+  opt.textContent = y.year + " (" + GEN_INFO[y.gen].name.split(" ")[0] + ")";
+  jump.appendChild(opt);
+
+  const d = document.createElement("button");
+  d.type = "button";
+  d.className = "dot";
+  d.setAttribute("aria-label", "Show " + y.year);
+  if (i === 0 || YEARS[i - 1].gen !== y.gen) d.classList.add("gen-start");
+  d.addEventListener("click", () => show(i));
+  dotsEl.appendChild(d);
+});
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]));
+}
+
+function render() {
+  const y = YEARS[idx];
+  const g = GEN_INFO[y.gen];
+  const photoSrc = y.img || GEN_PHOTO[y.gen];
+  const photoNote = y.img ? y.imgNote : "Generation photo (no specific photo for this year)";
+
+  const priceBlock = y.price2026
+    ? `<strong>2026 new pricing</strong><div>Excluding destination (destination is $1,235). Sport $30,430; Club $33,930 soft top / $41,900 RF; Grand Touring $35,730 soft top / $38,450 RF (manual); $36,650 / $39,420 (automatic).</div><div class="muted">Used-market average for all ND cars: about $35,684 (Visor, June 2026).</div>`
+    : `<strong>${esc(g.price.label)}</strong><div>${esc(g.price.value)}</div><div class="muted">${esc(g.price.note)}</div>`;
+
+  card.innerHTML = `
+    <div class="photo">
+      <img src="${esc(photoSrc)}" alt="${esc(y.year + " Mazda MX-5 " + g.name)}" loading="lazy" onerror="this.onerror=null;this.src='${GEN_PHOTO[y.gen]}';this.parentElement.nextElementSibling.textContent='Generation photo (year photo failed to load)';">
+    </div>
+    <div class="photo-note">${esc(photoNote)}</div>
+    <div class="body">
+      <span class="gen-tag">${esc(g.name)}</span>
+      <h2 class="year">${y.year}</h2>
+      <div class="headline">${esc(y.headline)}</div>
+      <p>${esc(g.blurb)}</p>
+      <div class="grid">
+        <div class="stat"><div class="label">Engine</div><div class="value">${esc(y.engine)}</div></div>
+        <div class="stat"><div class="label">Power</div><div class="value">${esc(y.power)}</div></div>
+        <div class="stat"><div class="label">Model years</div><div class="value">${esc(g.years)}</div></div>
+        <div class="stat"><div class="label">Generation</div><div class="value">${esc(g.name)}</div></div>
+      </div>
+      <strong>This year</strong>
+      <ul class="notes">${y.notes.map(n => `<li>${esc(n)}</li>`).join("")}</ul>
+      <div class="price">${priceBlock}</div>
+    </div>
+  `;
+
+  jump.value = idx;
+  counter.textContent = (idx + 1) + " of " + YEARS.length;
+  prevBtn.disabled = idx === 0;
+  nextBtn.disabled = idx === YEARS.length - 1;
+  [...dotsEl.children].forEach((d, i) => d.classList.toggle("on", i === idx));
+}
+
+function show(i) {
+  idx = Math.max(0, Math.min(YEARS.length - 1, i));
+  render();
+}
+
+prevBtn.addEventListener("click", () => show(idx - 1));
+nextBtn.addEventListener("click", () => show(idx + 1));
+jump.addEventListener("change", () => show(Number(jump.value)));
+
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "SELECT") return;
+  if (e.key === "ArrowLeft") show(idx - 1);
+  if (e.key === "ArrowRight") show(idx + 1);
+});
+
+let touchX = null;
+card.addEventListener("touchstart", e => { touchX = e.touches[0].clientX; }, { passive: true });
+card.addEventListener("touchend", e => {
+  if (touchX === null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1));
+  touchX = null;
+}, { passive: true });
+
+const themeBtn = document.getElementById("theme");
+themeBtn.addEventListener("click", () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme === "dark" || (!root.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+  root.dataset.theme = dark ? "light" : "dark";
+});
+
+render();
+</script>
+</body>
+</html>
